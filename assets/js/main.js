@@ -8,13 +8,14 @@ var Palm = {
 
     // do not display this un-duotoned image in final result
     var palmImg = new Image();
-    palmImg.crossOrigin = 'Anonymous';
-    palmImg.src = palmPath;
     palmImg.onload = function() {
       context.canvas.width = window.innerWidth;
       context.canvas.height = window.innerHeight;
       context.drawImage(palmImg, 0, 0, context.canvas.width, context.canvas.height);
+      console.log(context.getImageData(0, 0, context.canvas.width, context.canvas.height));
     };
+    palmImg.crossOrigin = 'Anonymous';
+    palmImg.src = palmPath;
   }
 }
 
