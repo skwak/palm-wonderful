@@ -13,7 +13,8 @@ var Palm = {
       context.canvas.height = window.innerHeight;
       context.drawImage(palmImg, 0, 0, context.canvas.width, context.canvas.height);
       var palmData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
-      Palm.imageData(palmData);
+      var duotoneData = Palm.imageData(palmData);
+      context.putImageData(duotoneData, 0, 0);
     };
     palmImg.crossOrigin = 'Anonymous';
     palmImg.src = palmPath;
@@ -21,9 +22,34 @@ var Palm = {
   imageData: function(pixels) {
     for (var i = 0; i < pixels.data.length; i+=4) {
       var brightness = Pixel.brightness(pixels.data[i], pixels.data[i+1], pixels.data[i+2]);
-      console.log(brightness);
+      // console.log(brightness);
+      var firstColorBrightnessPercentage = brightness/255;
+      var secondColorPercentage = 1 - firstColorBrightnessPercentage;
+      var redRbg = [firstColorBrightnessPercentage * ComplementaryColors.color1[0], 0, 0];
+      var greenRbg = [0, secondColorPercentage * ComplementaryColors.color2[1], 0];
+      var finalRgb = ComplementaryColors.duotoneColorRgb(redRbg, greenRbg);
+      pixels.data[i] = finalRgb[0];
+      pixels.data[i+1] = finalRgb[1];
+      pixels.data[i+2] = finalRgb[2];
     }
+    return pixels;
   },
+}
+
+var ComplementaryColors = {
+  // hard set it for now
+  // var color1 = rgb(255, 0 ,0);
+  // var color2 = rgb(0, 128, 0);
+  color1: [255, 0, 0],
+  color2: [0, 128, 0],
+  duotoneColorRgb: function(firstRgbArr, secondRgbArr) {
+    var newColorRgb = [];
+    for(var i in firstRgbArr) {
+      var val = firstRgbArr[i] + secondRgbArr[i];
+      newColorRgb.push(val);
+    }
+    return newColorRgb;
+  }
 }
 
 var Pixel = {

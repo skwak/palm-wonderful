@@ -5,8 +5,7 @@ module.exports = function(grunt) {
         files: ['assets/css/*.css'],
       },
       js: {
-        files: ['assets/js/*.js'],
-        tasks: ['uglify:dev']
+        files: ['assets/js/*.js']
       }
     }
   });
