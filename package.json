@@ -1,0 +1,16 @@
+{
+  "name": "palm-wonderful",
+  "version": "1.0.0",
+  "description": "psychedelic palm",
+  "author": "Stephanie Kwak <sk@stephaniekwak.com",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/skwak/palm-wonderful.git"
+  },
+  "devDependencies": {
+    "grunt": "^0.4.5",
+    "grunt-cli": "^1.1.0",
+    "grunt-contrib-watch": "^1.0.0"
+  }
+}
