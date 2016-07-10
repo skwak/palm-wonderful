@@ -13,16 +13,15 @@ var Palm = {
       context.canvas.height = window.innerHeight;
       context.drawImage(palmImg, 0, 0, context.canvas.width, context.canvas.height);
       var palmData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
-      var duotoneData = Palm.imageData(palmData);
+      var duotoneData = Palm.duotoneImageData(palmData);
       context.putImageData(duotoneData, 0, 0);
     };
     palmImg.crossOrigin = 'Anonymous';
     palmImg.src = palmPath;
   },
-  imageData: function(pixels) {
+  duotoneImageData: function(pixels) {
     for (var i = 0; i < pixels.data.length; i+=4) {
       var brightness = Pixel.brightness(pixels.data[i], pixels.data[i+1], pixels.data[i+2]);
-      // console.log(brightness);
       var firstColorBrightnessPercentage = brightness/255;
       var secondColorPercentage = 1 - firstColorBrightnessPercentage;
       var redRbg = [firstColorBrightnessPercentage * ComplementaryColors.color1[0], 0, 0];
