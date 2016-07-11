@@ -2,6 +2,7 @@ var Palm = {
   transformOriginal: function() {
     // image path only works with CORS chrome plugin
     // remember to change this link once site has been published
+    // var palmPath = $('#palm-img').attr('src');
     var palmPath = 'http://stephaniekwak.com/misc/palmtree.jpg';
     var mainCanvas = document.getElementById('palm-canvas');
     var context = mainCanvas.getContext('2d');
@@ -58,6 +59,22 @@ var Pixel = {
   }
 }
 
+var TrackKeys = {
+  // thinking left and right = modulate duotone effect
+  // up and down = change complementary colors
+  // for now, focus on left and right keys
+  checkKey: function(event) {
+    event.preventDefault();
+    // 37 is left, 39 is right
+    if (event.keyCode == 37 || event.keyCode == 39) {
+      
+    }
+  }
+}
+
 $(document).ready(function($) {
   Palm.transformOriginal();
+  document.addEventListener('keydown', function(e) {
+    TrackKeys.checkKey(e);
+  });
 });
