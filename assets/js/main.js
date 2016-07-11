@@ -6,22 +6,21 @@ var Palm = {
     var palmPath = 'http://stephaniekwak.com/misc/palmtree.jpg';
     var mainCanvas = document.getElementById('palm-canvas');
     var context = mainCanvas.getContext('2d');
-
-    // do not display this un-duotoned image in final result
     var palmImg = new Image();
     palmImg.onload = function() {
       context.canvas.width = window.innerWidth;
       context.canvas.height = window.innerHeight;
       context.drawImage(palmImg, 0, 0, context.canvas.width, context.canvas.height);
       var palmData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
-      var duotoneData = Palm.duotoneImageData(palmData);
+      var duotoneData = Palm.setDuotone(palmData);
+      Palm.currentImageData = duotoneData;
       context.putImageData(duotoneData, 0, 0);
     };
     palmImg.crossOrigin = 'Anonymous';
     palmImg.src = palmPath;
   },
 
-  duotoneImageData: function(pixels) {
+  setDuotone: function(pixels) {
     for (var i = 0; i < pixels.data.length; i+=4) {
       var brightness = Pixel.brightness(pixels.data[i], pixels.data[i+1], pixels.data[i+2]);
       var firstColorBrightnessPercentage = brightness/255;
@@ -33,21 +32,52 @@ var Palm = {
       pixels.data[i+1] = finalRgb[1];
       pixels.data[i+2] = finalRgb[2];
     }
+    Palm.duotoneImageDataArray = pixels.data.slice(0);
     return pixels;
   },
 
+  // these transitions only work for green and red right now
   transitionToDarkerColor: function() {
     var darkerColor = ComplementaryColors.color1;
-    console.log(Keyboard.keyMap);
+    var lighterColor = ComplementaryColors.color2;
+
+    var balancedIncrement = darkerColor[0]/lighterColor[1];
+    for (var i = 0; i < Palm.currentImageData.data.length; i += 4) {
+      Palm.currentImageData.data[i] += balancedIncrement;
+      Palm.currentImageData.data[i+1] -= balancedIncrement;
+    }
+    var mainCanvas = document.getElementById('palm-canvas');
+    var context = mainCanvas.getContext('2d');
+    context.putImageData(Palm.currentImageData, 0, 0);
+  },
+
+  transitionToDuotone: function() {
+    var darkerColor = ComplementaryColors.color1;
+    var lighterColor = ComplementaryColors.color2;
+    var balancedIncrement = darkerColor[0]/lighterColor[1];
+
+    for (var i = 0; i < Palm.currentImageData.data.length; i += 4) {
+      if (Palm.currentImageData.data[i] !== Palm.duotoneImageDataArray[i] || Palm.currentImageData.data[i+1] !== Palm.duotoneImageDataArray[i+1]) {
+        if (Palm.currentImageData.data[i] > Palm.duotoneImageDataArray[i]) {
+          Palm.currentImageData.data[i] -= balancedIncrement;
+        } else if (Palm.currentImageData.data[i] < Palm.duotoneImageDataArray[i]) {
+          Palm.currentImageData.data[i] += balancedIncrement;
+        }
+
+        if (Palm.currentImageData.data[i+1] > Palm.duotoneImageDataArray[i+1]) {
+          Palm.currentImageData.data[i+1] -= balancedIncrement;
+        } else {
+          Palm.currentImageData.data[i+1] += balancedIncrement;
+        }
+      }
+    }
+    var mainCanvas = document.getElementById('palm-canvas');
+    var context = mainCanvas.getContext('2d');
+    context.putImageData(Palm.currentImageData, 0, 0);
   }
 }
 
 var ComplementaryColors = {
-  // hard set it for now
-  // red is 'darker' because its value (255) is greater than the green (128)
-  // var color1 = rgb(255, 0 ,0);
-  // var color2 = rgb(0, 128, 0);
-  // darker color is color1
   setColors: function(color1Arr, color2Arr) {
     ComplementaryColors.color1 = color1Arr;
     ComplementaryColors.color2 = color2Arr;
@@ -77,14 +107,12 @@ var Keyboard = {
   checkKey: function(event) {
     event.preventDefault();
     // 37 is left, 39 is right
-    if (event.keyCode == 37 || event.keyCode == 39) {
-      if (event.keyCode == 37) Keyboard.keyMap.left += 1;
-      if (event.keyCode == 39) Keyboard.keyMap.right +=1;
+    if (event.keyCode == 39) {
       Palm.transitionToDarkerColor();
+    } else if (event.keyCode == 37) {
+      Palm.transitionToDuotone();
     }
-  },
-
-  keyMap: { 'left': 0, 'right': 0 }
+  }
 }
 
 $(document).ready(function($) {
