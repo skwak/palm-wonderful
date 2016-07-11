@@ -1,23 +1,16 @@
-var Palm = {
-  transformOriginal: function() {
-    // image path only works with CORS chrome plugin
-    // remember to change this link once site has been published
-    // var palmPath = $('#palm-img').attr('src');
-    var palmPath = 'http://stephaniekwak.com/misc/palmtree.jpg';
-    var mainCanvas = document.getElementById('palm-canvas');
-    var context = mainCanvas.getContext('2d');
-    var palmImg = new Image();
-    palmImg.onload = function() {
+var Picture = {
+  transformOriginal: function(context, img, imagePath) {
+    img.onload = function() {
       context.canvas.width = window.innerWidth;
       context.canvas.height = window.innerHeight;
-      context.drawImage(palmImg, 0, 0, context.canvas.width, context.canvas.height);
-      var palmData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
-      var duotoneData = Palm.setDuotone(palmData);
-      Palm.currentImageData = duotoneData;
+      context.drawImage(img, 0, 0, context.canvas.width, context.canvas.height);
+      var imgData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
+      var duotoneData = Picture.setDuotone(imgData);
+      Picture.currentImageData = duotoneData;
       context.putImageData(duotoneData, 0, 0);
     };
-    palmImg.crossOrigin = 'Anonymous';
-    palmImg.src = palmPath;
+    img.crossOrigin = 'Anonymous';
+    img.src = imagePath;
   },
 
   setDuotone: function(pixels) {
@@ -32,7 +25,7 @@ var Palm = {
       pixels.data[i+1] = finalRgb[1];
       pixels.data[i+2] = finalRgb[2];
     }
-    Palm.duotoneImageDataArray = pixels.data.slice(0);
+    Picture.duotoneImageDataArray = pixels.data.slice(0);
     return pixels;
   },
 
@@ -42,13 +35,13 @@ var Palm = {
     var lighterColor = ComplementaryColors.color2;
 
     var balancedIncrement = darkerColor[0]/lighterColor[1];
-    for (var i = 0; i < Palm.currentImageData.data.length; i += 4) {
-      Palm.currentImageData.data[i] += balancedIncrement;
-      Palm.currentImageData.data[i+1] -= balancedIncrement;
+    for (var i = 0; i < Picture.currentImageData.data.length; i += 4) {
+      Picture.currentImageData.data[i] += balancedIncrement;
+      Picture.currentImageData.data[i+1] -= balancedIncrement;
     }
     var mainCanvas = document.getElementById('palm-canvas');
     var context = mainCanvas.getContext('2d');
-    context.putImageData(Palm.currentImageData, 0, 0);
+    context.putImageData(Picture.currentImageData, 0, 0);
   },
 
   transitionToDuotone: function() {
@@ -56,24 +49,24 @@ var Palm = {
     var lighterColor = ComplementaryColors.color2;
     var balancedIncrement = darkerColor[0]/lighterColor[1];
 
-    for (var i = 0; i < Palm.currentImageData.data.length; i += 4) {
-      if (Palm.currentImageData.data[i] !== Palm.duotoneImageDataArray[i] || Palm.currentImageData.data[i+1] !== Palm.duotoneImageDataArray[i+1]) {
-        if (Palm.currentImageData.data[i] > Palm.duotoneImageDataArray[i]) {
-          Palm.currentImageData.data[i] -= balancedIncrement;
-        } else if (Palm.currentImageData.data[i] < Palm.duotoneImageDataArray[i]) {
-          Palm.currentImageData.data[i] += balancedIncrement;
+    for (var i = 0; i < Picture.currentImageData.data.length; i += 4) {
+      if (Picture.currentImageData.data[i] !== Picture.duotoneImageDataArray[i] || Picture.currentImageData.data[i+1] !== Picture.duotoneImageDataArray[i+1]) {
+        if (Picture.currentImageData.data[i] > Picture.duotoneImageDataArray[i]) {
+          Picture.currentImageData.data[i] -= balancedIncrement;
+        } else if (Picture.currentImageData.data[i] < Picture.duotoneImageDataArray[i]) {
+          Picture.currentImageData.data[i] += balancedIncrement;
         }
 
-        if (Palm.currentImageData.data[i+1] > Palm.duotoneImageDataArray[i+1]) {
-          Palm.currentImageData.data[i+1] -= balancedIncrement;
+        if (Picture.currentImageData.data[i+1] > Picture.duotoneImageDataArray[i+1]) {
+          Picture.currentImageData.data[i+1] -= balancedIncrement;
         } else {
-          Palm.currentImageData.data[i+1] += balancedIncrement;
+          Picture.currentImageData.data[i+1] += balancedIncrement;
         }
       }
     }
     var mainCanvas = document.getElementById('palm-canvas');
     var context = mainCanvas.getContext('2d');
-    context.putImageData(Palm.currentImageData, 0, 0);
+    context.putImageData(Picture.currentImageData, 0, 0);
   }
 }
 
@@ -101,23 +94,25 @@ var Pixel = {
 }
 
 var Keyboard = {
-  // thinking left and right = modulate duotone effect
-  // up and down = change complementary colors
-  // for now, focus on left and right keys
   checkKey: function(event) {
     event.preventDefault();
-    // 37 is left, 39 is right
     if (event.keyCode == 39) {
-      Palm.transitionToDarkerColor();
+      Picture.transitionToDarkerColor();
     } else if (event.keyCode == 37) {
-      Palm.transitionToDuotone();
+      Picture.transitionToDuotone();
     }
   }
 }
 
 $(document).ready(function($) {
+  // var palmPath = $('#palm-img').attr('src');
+  var palmPath = 'http://stephaniekwak.com/misc/palmtree.jpg';
+  var mainCanvas = document.getElementById('palm-canvas');
+  var context = mainCanvas.getContext('2d');
+  var palmImg = new Image();
+
   ComplementaryColors.setColors([255, 0, 0], [0, 128, 0]);
-  Palm.transformOriginal();
+  Picture.transformOriginal(context, palmImg, palmPath);
   document.addEventListener('keydown', function(e) {
     Keyboard.checkKey(e);
   });
