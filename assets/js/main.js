@@ -38,13 +38,21 @@ var Picture = {
 
     switch (type) {
       case 'dark':
+      // If darkening (going to red), then loop through the pixels and
+      // increment the red (by a 'balanced increment' so that the effect isn’t super slow)
+      // and subtract any green.
         for (var i = 0; i < Picture.currentImageData.data.length; i += 4) {
           Picture.currentImageData.data[i] += balancedIncrement;
           Picture.currentImageData.data[i+1] -= balancedIncrement;
         }
         context.putImageData(Picture.currentImageData, 0, 0);
         break;
+        
       case 'duotone':
+      //If going to the duotone, loop through the current pixels (in this case, since was
+      // brute forcing the image to green and red, this loop just looks at the first two elements
+      // of each [ r, g, b, alpha]. If a current pixel is not the same as the corresponding duotone pixel,
+      // then decrease any red and increase the green using that balanced increment.
         for (var i = 0; i < Picture.currentImageData.data.length; i += 4) {
           if (Picture.currentImageData.data[i] !== Picture.duotoneImageDataArray[i] || Picture.currentImageData.data[i+1] !== Picture.duotoneImageDataArray[i+1]) {
             if (Picture.currentImageData.data[i] > Picture.duotoneImageDataArray[i]) {
