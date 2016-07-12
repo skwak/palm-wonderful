@@ -25,48 +25,44 @@ var Picture = {
       pixels.data[i+1] = finalRgb[1];
       pixels.data[i+2] = finalRgb[2];
     }
-    Picture.duotoneImageDataArray = pixels.data.slice(0);
+    var pixelDataArr = Array.prototype.slice.call(pixels.data);
+    Picture.duotoneImageDataArray = new Uint8ClampedArray(pixelDataArr);
+
     return pixels;
   },
 
-  // these transitions only work for green and red right now
-  transitionToDarkerColor: function() {
-    var darkerColor = ComplementaryColors.color1;
-    var lighterColor = ComplementaryColors.color2;
-
-    var balancedIncrement = darkerColor[0]/lighterColor[1];
-    for (var i = 0; i < Picture.currentImageData.data.length; i += 4) {
-      Picture.currentImageData.data[i] += balancedIncrement;
-      Picture.currentImageData.data[i+1] -= balancedIncrement;
-    }
-    var mainCanvas = document.getElementById('palm-canvas');
-    var context = mainCanvas.getContext('2d');
-    context.putImageData(Picture.currentImageData, 0, 0);
-  },
-
-  transitionToDuotone: function() {
+  transition: function(type, context, canvas) {
     var darkerColor = ComplementaryColors.color1;
     var lighterColor = ComplementaryColors.color2;
     var balancedIncrement = darkerColor[0]/lighterColor[1];
 
-    for (var i = 0; i < Picture.currentImageData.data.length; i += 4) {
-      if (Picture.currentImageData.data[i] !== Picture.duotoneImageDataArray[i] || Picture.currentImageData.data[i+1] !== Picture.duotoneImageDataArray[i+1]) {
-        if (Picture.currentImageData.data[i] > Picture.duotoneImageDataArray[i]) {
-          Picture.currentImageData.data[i] -= balancedIncrement;
-        } else if (Picture.currentImageData.data[i] < Picture.duotoneImageDataArray[i]) {
+    switch (type) {
+      case 'dark':
+        for (var i = 0; i < Picture.currentImageData.data.length; i += 4) {
           Picture.currentImageData.data[i] += balancedIncrement;
-        }
-
-        if (Picture.currentImageData.data[i+1] > Picture.duotoneImageDataArray[i+1]) {
           Picture.currentImageData.data[i+1] -= balancedIncrement;
-        } else {
-          Picture.currentImageData.data[i+1] += balancedIncrement;
         }
+        context.putImageData(Picture.currentImageData, 0, 0);
+        break;
+      case 'duotone':
+        for (var i = 0; i < Picture.currentImageData.data.length; i += 4) {
+          if (Picture.currentImageData.data[i] !== Picture.duotoneImageDataArray[i] || Picture.currentImageData.data[i+1] !== Picture.duotoneImageDataArray[i+1]) {
+            if (Picture.currentImageData.data[i] > Picture.duotoneImageDataArray[i]) {
+              Picture.currentImageData.data[i] -= balancedIncrement;
+            } else if (Picture.currentImageData.data[i] < Picture.duotoneImageDataArray[i]) {
+              Picture.currentImageData.data[i] += balancedIncrement;
+            }
+
+            if (Picture.currentImageData.data[i+1] > Picture.duotoneImageDataArray[i+1]) {
+              Picture.currentImageData.data[i+1] -= balancedIncrement;
+            } else if (Picture.currentImageData.data[i+1] < Picture.duotoneImageDataArray[i+1])  {
+              Picture.currentImageData.data[i+1] += balancedIncrement;
+            }
+          }
+        }
+        context.putImageData(Picture.currentImageData, 0, 0);
+        break;
       }
-    }
-    var mainCanvas = document.getElementById('palm-canvas');
-    var context = mainCanvas.getContext('2d');
-    context.putImageData(Picture.currentImageData, 0, 0);
   }
 }
 
@@ -94,26 +90,24 @@ var Pixel = {
 }
 
 var Keyboard = {
-  checkKey: function(event) {
+  checkKey: function(event, context, canvas) {
     event.preventDefault();
     if (event.keyCode == 39) {
-      Picture.transitionToDarkerColor();
+      Picture.transition('dark', context, canvas);
     } else if (event.keyCode == 37) {
-      Picture.transitionToDuotone();
+      Picture.transition('duotone', context, canvas);
     }
   }
 }
 
 $(document).ready(function($) {
-  // var palmPath = $('#palm-img').attr('src');
-  var palmPath = 'http://stephaniekwak.com/misc/palmtree.jpg';
+  var palmPath = $('#palm-img').attr('src');
   var mainCanvas = document.getElementById('palm-canvas');
   var context = mainCanvas.getContext('2d');
   var palmImg = new Image();
-
   ComplementaryColors.setColors([255, 0, 0], [0, 128, 0]);
   Picture.transformOriginal(context, palmImg, palmPath);
   document.addEventListener('keydown', function(e) {
-    Keyboard.checkKey(e);
+    Keyboard.checkKey(e, context, mainCanvas);
   });
 });
