@@ -26,7 +26,7 @@ var Picture = {
       pixels.data[i+2] = finalRgb[2];
     }
     var pixelDataArr = Array.prototype.slice.call(pixels.data);
-    Picture.duotoneImageDataArray = new Uint8ClampedArray(pixelDataArr);
+    this.duotoneImageDataArray = new Uint8ClampedArray(pixelDataArr);
 
     return pixels;
   },
@@ -41,11 +41,11 @@ var Picture = {
       // If darkening (going to red), then loop through the pixels and
       // increment the red (by a 'balanced increment' so that the effect isn’t super slow)
       // and subtract any green.
-        for (var i = 0; i < Picture.currentImageData.data.length; i += 4) {
-          Picture.currentImageData.data[i] += balancedIncrement;
-          Picture.currentImageData.data[i+1] -= balancedIncrement;
+        for (var i = 0; i < this.currentImageData.data.length; i += 4) {
+          this.currentImageData.data[i] += balancedIncrement;
+          this.currentImageData.data[i+1] -= balancedIncrement;
         }
-        context.putImageData(Picture.currentImageData, 0, 0);
+        context.putImageData(this.currentImageData, 0, 0);
         break;
 
       case 'duotone':
@@ -54,21 +54,21 @@ var Picture = {
       // of each [ r, g, b, alpha]. If a current pixel is not the same as the corresponding duotone pixel,
       // then decrease any red and increase the green using that balanced increment.
         for (var i = 0; i < Picture.currentImageData.data.length; i += 4) {
-          if (Picture.currentImageData.data[i] !== Picture.duotoneImageDataArray[i] || Picture.currentImageData.data[i+1] !== Picture.duotoneImageDataArray[i+1]) {
-            if (Picture.currentImageData.data[i] > Picture.duotoneImageDataArray[i]) {
-              Picture.currentImageData.data[i] -= balancedIncrement;
-            } else if (Picture.currentImageData.data[i] < Picture.duotoneImageDataArray[i]) {
-              Picture.currentImageData.data[i] += balancedIncrement;
+          if (this.currentImageData.data[i] !== this.duotoneImageDataArray[i] || this.currentImageData.data[i+1] !== this.duotoneImageDataArray[i+1]) {
+            if (this.currentImageData.data[i] > this.duotoneImageDataArray[i]) {
+              this.currentImageData.data[i] -= balancedIncrement;
+            } else if (this.currentImageData.data[i] < this.duotoneImageDataArray[i]) {
+              this.currentImageData.data[i] += balancedIncrement;
             }
 
-            if (Picture.currentImageData.data[i+1] > Picture.duotoneImageDataArray[i+1]) {
-              Picture.currentImageData.data[i+1] -= balancedIncrement;
-            } else if (Picture.currentImageData.data[i+1] < Picture.duotoneImageDataArray[i+1])  {
-              Picture.currentImageData.data[i+1] += balancedIncrement;
+            if (this.currentImageData.data[i+1] > this.duotoneImageDataArray[i+1]) {
+              this.currentImageData.data[i+1] -= balancedIncrement;
+            } else if (this.currentImageData.data[i+1] < this.duotoneImageDataArray[i+1])  {
+              this.currentImageData.data[i+1] += balancedIncrement;
             }
           }
         }
-        context.putImageData(Picture.currentImageData, 0, 0);
+        context.putImageData(this.currentImageData, 0, 0);
         break;
       }
   }
@@ -76,8 +76,8 @@ var Picture = {
 
 var ComplementaryColors = {
   setColors: function(color1Arr, color2Arr) {
-    ComplementaryColors.color1 = color1Arr;
-    ComplementaryColors.color2 = color2Arr;
+    this.color1 = color1Arr;
+    this.color2 = color2Arr;
   },
 
   duotoneColorRgb: function(firstRgbArr, secondRgbArr) {
