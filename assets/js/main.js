@@ -16,10 +16,10 @@ var Picture = {
   setDuotone: function(pixels) {
     for (var i = 0; i < pixels.data.length; i+=4) {
       var brightness = Pixel.brightness(pixels.data[i], pixels.data[i+1], pixels.data[i+2]);
-      var firstColorBrightnessPercentage = brightness/255;
-      var secondColorPercentage = 1 - firstColorBrightnessPercentage;
-      var redRbg = [firstColorBrightnessPercentage * ComplementaryColors.color1[0], 0, 0];
-      var greenRbg = [0, secondColorPercentage * ComplementaryColors.color2[1], 0];
+      var lighterColorBrightnessPercentage = brightness/255;
+      var darkerColorBrightnessPercentage  = 1 - lighterColorBrightnessPercentage;
+      var redRbg = [darkerColorBrightnessPercentage * ComplementaryColors.color1[0], 0, 0];
+      var greenRbg = [0, lighterColorBrightnessPercentage * ComplementaryColors.color2[1], 0];
       var finalRgb = ComplementaryColors.duotoneColorRgb(redRbg, greenRbg);
       pixels.data[i] = finalRgb[0];
       pixels.data[i+1] = finalRgb[1];
@@ -47,7 +47,7 @@ var Picture = {
         }
         context.putImageData(Picture.currentImageData, 0, 0);
         break;
-        
+
       case 'duotone':
       //If going to the duotone, loop through the current pixels (in this case, since was
       // brute forcing the image to green and red, this loop just looks at the first two elements
